@@ -21,5 +21,25 @@ server.listen(port, function () {
 });
 
 // socket.io
-const socket = require("socket.io"); // library
-const io = socket(server);
+const socket = require("socket.io"); // library (package)
+const io = socket(server); //connect socket with server
+
+io.on("connection", newConnection);
+function newConnection(sck) {
+  console.log("New Connection - ID: " + sck.id);
+  // sck.on()
+  sck.on("connection_name", receive);
+  function receive(data) {
+    console.log(data)
+  }
+}
+
+
+
+
+
+
+
+
+
+
