@@ -19,3 +19,7 @@ const server = http.createServer(app);
 server.listen(port, function () {
   console.log("Server is running: Port: " + port);
 });
+
+// socket.io
+const socket = require("socket.io"); // library
+const io = socket(server);
