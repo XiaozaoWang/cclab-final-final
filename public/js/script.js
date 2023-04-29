@@ -5,7 +5,8 @@ let r,g,b;
 
 
 function setup() {
-  createCanvas(600, 400);
+  let cnv = createCanvas(600, 400);
+  cnv.id("p5-canvas");
   background(220);
   
   socket = io.connect();
@@ -49,7 +50,13 @@ function sendViaSocket(data) {
   socket.emit(CONNECTION_NAME, data);
 }
 
-
+window.addEventListener("resize", doSomething);
+function doSomething() {
+  let element = document.getElementById("p5-canvas");
+  console.log(element);
+  element.style.width = "100px";
+  element.style.height = "100px";
+}
 
 
 
