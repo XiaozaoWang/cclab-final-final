@@ -11,7 +11,15 @@ app.get("/", function (request, response) {      //req a html page
 
 // HTTP Server
 const http = require("http");
-//c
+//const hostname = "127.0.0.1"; // localhost
+const port = 3000;
+const server = http.createServer(app);
+//server.listen(port, hostname, function() {}); 
+server.listen(port, function() {
+  console.log("Server is running: Port: " + port);
+}); 
+
+
 
 
 
