@@ -1,6 +1,9 @@
 const CONNECTION_NAME = "connection_name";
 let socket;
 
+let r,g,b;
+
+
 function setup() {
   createCanvas(600, 400);
   background(220);
@@ -8,25 +11,42 @@ function setup() {
   socket = io.connect();
   console.log(socket);
   socket.on(CONNECTION_NAME, receiveViaSocket);
+  
+  r = random(255);
+  g = random(255);
+  b = random(255);
 }
 
 function draw() {
-  circle(random(width), random(height), 30);
+  //circle(random(width), random(height), 30);
 }
 
 function mousePressed() {
   let data = {
-    x: mouseX,
-    y: mouseY
+    x: floor(mouseX),
+    y: floor(mouseY),
+    r: parseFloat(r.toFixed(1)),
+    g: parseFloat(g.toFixed(1)),
+    b: parseFloat(b.toFixed(1)),
   };
+  
+  sendViaSocket(data);
+  
+  noStroke();
+  fill(r, g, b);
+  circle(mouseX, mouseY, 30);
 }
 
-function receiveViaSocket(Data) {
-  //
+function receiveViaSocket(data) {
+  console.log(data);
+  
+  noStroke();
+  fill(data.r, data.g, data.b);
+  circle(data.x, data.y, 15);
 }
 
 function sendViaSocket(data) {
-  //
+  socket.emit(CONNECTION_NAME, data);
 }
 
 

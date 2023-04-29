@@ -30,7 +30,9 @@ function newConnection(sck) {
   // sck.on()
   sck.on("connection_name", receive);
   function receive(data) {
-    console.log(data)
+    //https://socket.io/docs/v3/emit-cheatsheet/index.html
+    console.log(data);
+    sck.broadcast.emit("connection_name", data); // send to all except for the sender
   }
 }
 
