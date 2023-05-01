@@ -10,7 +10,7 @@ function setup() {
   background(220);
   
   socket = io.connect();
-  console.log(socket);
+  console.log("socket:",socket);
   socket.on(CONNECTION_NAME, receiveViaSocket);
   
   r = random(255);
