@@ -50,13 +50,13 @@ function sendViaSocket(data) {
   socket.emit(CONNECTION_NAME, data);
 }
 
-window.addEventListener("resize", doSomething);
-function doSomething() {
-  let element = document.getElementById("p5-canvas");
-  console.log(element);
-  element.style.width = "100px";
-  element.style.height = "100px";
-}
+// window.addEventListener("resize", doSomething);
+// function doSomething() {
+//   let element = document.getElementById("p5-canvas");
+//   console.log(element);
+//   element.style.width = "100px";
+//   element.style.height = "100px";
+// }
 
 
 
