@@ -11,6 +11,7 @@ function setup() {
   let cnv = createCanvas(600, 400);
   cnv.id("p5-canvas");
   background(220);
+  windowResized();
   
   socket = io.connect();
   console.log("socket:",socket);
@@ -53,15 +54,23 @@ function sendViaSocket(data) {
   socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
 }
 
-// window.addEventListener("resize", doSomething);
-// function doSomething() {
-//   let element = document.getElementById("p5-canvas");
-//   console.log(element);
+// window.addEventListener("resize", resize);
+// function resize() {
+//   let p5canvas = document.getElementById("p5-canvas");
+//   console.log(p5canvas.width, p5canvas.height);
 //   element.style.width = "100px";
 //   element.style.height = "100px";
 // }
 
-
+function windowResized() {
+      
+      const containerWidth = document.getElementById('p5-canvas').offsetWidth;
+      const containerHeight = document.getElementById('p5-canvas').offsetHeight;
+      console.log("Am I here?",containerWidth,containerHeight);
+      // resizeCanvas(containerWidth, containerHeight);
+      // resizeCanvas(containerWidth, containerHeight);
+      window.resizeTo(containerWidth, containerHeight);
+    }
 
 
 
