@@ -32,7 +32,8 @@ function newConnection(sck) {
   // sck.on()
   client_count += 1;
   sck.name = client_count;
-  clients.push(sck);
+  sck.idCard = [sck.name, sck.id];
+  clients.push(sck.idCard);
   sck.write(`Welcome, ${sck.name}!\n`);
   console.log("clients:",clients);
 
@@ -41,7 +42,7 @@ function newConnection(sck) {
   
   
   
-  sck.on("clientOutPos", receive); // sets up a listener for a custom event called "connection_name" 
+  sck.on("clientOutPos", receive); // sets up a listener for a custom event called "clientOutPos"
   function receive(data) {   // what you receive is "data"
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
     console.log(data);
