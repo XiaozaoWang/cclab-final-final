@@ -28,11 +28,11 @@ io.on("connection", newConnection);
 function newConnection(sck) {
   console.log("New Connection - ID: " + sck.id);
   // sck.on()
-  sck.on("connection_name", receive);
+  sck.on("posADot", receive); // sets up a listener for a custom event called "connection_name" 
   function receive(data) {
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
     console.log(data);
-    sck.broadcast.emit("connection_name", data); // send to all except for the sender
+    sck.broadcast.emit("posADot", data); // send to all except for the sender
   }
 }
 
