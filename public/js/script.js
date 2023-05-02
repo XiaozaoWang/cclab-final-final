@@ -1,4 +1,7 @@
+// the client
+
 // const CONNECTION_NAME = "connection_name";
+
 let socket;
 
 let r,g,b;
@@ -11,7 +14,7 @@ function setup() {
   
   socket = io.connect();
   console.log("socket:",socket);
-  socket.on("posADot", receiveViaSocket); // sets up a listener for a custom event called "connection_name"
+  socket.on("serverOutPos", receiveViaSocket); // set up a listener that waits the 
   
   r = random(255);
   g = random(255);
@@ -47,7 +50,7 @@ function receiveViaSocket(data) {
 }
 
 function sendViaSocket(data) {
-  socket.emit("posADot", data); // CONNECTION_NAME i.e."connection_name", type of event
+  socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
 }
 
 // window.addEventListener("resize", doSomething);

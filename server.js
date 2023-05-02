@@ -28,11 +28,31 @@ io.on("connection", newConnection);
 function newConnection(sck) {
   console.log("New Connection - ID: " + sck.id);
   // sck.on()
-  sck.on("posADot", receive); // sets up a listener for a custom event called "connection_name" 
-  function receive(data) {
+  
+  
+  
+  
+  socket.write('Please enter your name: ');
+  // Store the name when the client sends it
+  socket.on('data', function(data) {
+  const name = data.toString().trim();
+  console.log(`Client name is ${name}`);
+
+  // Store the name on the socket object for future use
+  socket.name = name;
+
+  // Send a welcome message to the client
+  socket.write(`Welcome, ${name}!\n`);
+  
+  
+  
+  
+  
+  sck.on("clientOutPos", receive); // sets up a listener for a custom event called "connection_name" 
+  function receive(data) {   // what you receive is "data"
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
     console.log(data);
-    sck.broadcast.emit("posADot", data); // send to all except for the sender
+    sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
   }
 }
 
