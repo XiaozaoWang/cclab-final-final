@@ -3,6 +3,8 @@
 // express app
 const express = require("express"); // require some package from the library
 const app = express(); // show a website to the clients
+let clients = [];
+let client_count = 0;
 
 app.use(express.static("public")); // use things inside the public folder
 app.get("/", function (request, response) {  // "/" is the root URL
@@ -28,21 +30,12 @@ io.on("connection", newConnection);
 function newConnection(sck) {
   console.log("New Connection - ID: " + sck.id);
   // sck.on()
-  
-  
-  
-  
-  socket.write('Please enter your name: ');
-  // Store the name when the client sends it
-  socket.on('data', function(data) {
-  const name = data.toString().trim();
-  console.log(`Client name is ${name}`);
+  client_count += 1;
+  sck.name = client_count;
+  clients.push(sck);
+  sck.write(`Welcome, ${sck.name}!\n`);
+  console.log("clients:",clients);
 
-  // Store the name on the socket object for future use
-  socket.name = name;
-
-  // Send a welcome message to the client
-  socket.write(`Welcome, ${name}!\n`);
   
   
   
