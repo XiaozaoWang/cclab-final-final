@@ -8,7 +8,7 @@ let r,g,b;
 
 
 function setup() {
-  let cnv = createCanvas(600, 400);
+  let cnv = createCanvas(400, 400);
   cnv.id("p5-canvas");
   background(220);
   windowResized();
