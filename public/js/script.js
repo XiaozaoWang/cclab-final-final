@@ -48,6 +48,7 @@ function mousePressed() {
 }
 
 function receiveViaSocket(data) {
+  console.log("The things are printed in the browser");
   console.log(data);
   
   noStroke();

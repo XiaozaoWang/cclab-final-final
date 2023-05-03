@@ -36,16 +36,18 @@ function newConnection(sck) {
   sck.name = client_count;
   sck.idCard = [sck.name, sck.id];
   clients.push(sck.idCard);
-  sck.write(`Welcome, ${sck.name}!\n`);
+  // sck.write(`Welcome, ${sck.name}!\n`);
   console.log("clients:",clients);
 
 
   sck.on("clientOutPos", receive); // sets up a listener for a custom event called "clientOutPos"
   function receive(data) {   // what you receive is "data"
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
-    console.log("from" + sck.id + ": " + data);
+    console.log(data);
+    console.log("from socket " + sck.name + ": " + data);
     sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
     console.log("broadcasted to all");
+    // io.to(clients[1]).emit(/* ... */);
   }
 }
 
