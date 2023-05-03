@@ -62,6 +62,7 @@ function sendViaSocket(data) {
 //   element.style.height = "100px";
 // }
 
+
 function windowResized() {
       
       const containerWidth = document.getElementById('p5-canvas').offsetWidth;
