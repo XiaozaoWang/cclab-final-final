@@ -11,8 +11,13 @@ function setup() {
   let cnv = createCanvas(400, 400);
   cnv.id("p5-canvas");
   background(220);
-  windowResized();
+  // windowResized();
   
+  
+ /*******
+  Connect to the WebSocket server using the io.connect() method provided by the socket.io library, 
+  and assign the resulting socket object to the socket variable.
+  ********/
   socket = io.connect();
   console.log("socket:",socket);
   socket.on("serverOutPos", receiveViaSocket); // set up a listener that waits the 
@@ -63,15 +68,15 @@ function sendViaSocket(data) {
 // }
 
 
-function windowResized() {
+// function windowResized() {
       
-      const containerWidth = document.getElementById('p5-canvas').offsetWidth;
-      const containerHeight = document.getElementById('p5-canvas').offsetHeight;
-      console.log("Am I here?",containerWidth,containerHeight);
-      // resizeCanvas(containerWidth, containerHeight);
-      // resizeCanvas(containerWidth, containerHeight);
-      window.resizeTo(containerWidth, containerHeight);
-    }
+//       const containerWidth = document.getElementById('p5-canvas').offsetWidth;
+//       const containerHeight = document.getElementById('p5-canvas').offsetHeight;
+//       console.log("Am I here?",containerWidth,containerHeight);
+//       // resizeCanvas(containerWidth, containerHeight);
+//       // resizeCanvas(containerWidth, containerHeight);
+//       window.resizeTo(containerWidth, containerHeight);
+//     }
 
 
 
