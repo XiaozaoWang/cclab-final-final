@@ -8,19 +8,35 @@
     <title>p5+node+socket</title>
 
     <!-- import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/console.css" />
 
     <!-- libraries -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
     
-    <script src="/js/script.js"></script>
+<!--     <script src="/js/console.js"></script> -->
   </head>
   
   <body>
-    <div id="container-p5">
-    </div>
+    <h1>Console</h1>
+    <button onclick="openNewWindow()">Open New Window</button>
+
+  <script>
+    function openNewWindow() {
+      const newWindow = window.open("main.html", "_blank", "width=400,height=400");
+
+      // // Connect the new window to the server using socket.io
+      // const socket = io();
+      // socket.on("connect", function() {
+      //   console.log("Connected to server from new window");
+      // });
+      // socket.on("serverOutPos", function(data) {
+      //   console.log("Received data from server in new window:", data);
+      // });
+      // newWindow.socket = socket;
+    }
+  </script>
   </body>
   
 </html>
