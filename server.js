@@ -10,8 +10,8 @@ let client_count = 0;
 app.use(express.static("public")); // use things inside the public folder
 app.get("/", function (request, response) {  // "/" is the root URL
   //req a html page
-  // response.sendFile(__dirname + "/views/index.html"); // grab a special one (actually starts with it)
-  response.sendFile(__dirname + "/views/console.html"); // we start with the console page
+  response.sendFile(__dirname + "/views/index.html"); // grab a special one (actually starts with it)
+  // response.sendFile(__dirname + "/views/console.html"); // we start with the console page
 });
 
 // HTTP Server
