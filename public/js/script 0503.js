@@ -11,8 +11,7 @@ let screenHeight = window.screen.height;
 var windowX;
 var windowY;
 const screenBar = 25; // needs improvement
-const windowBar = 57; // needs improvement
-console.log("window", window.innerWidth, window.innerHeight);
+const windowBar = 55; // needs improvement
 
 
 let pX = 0;
@@ -21,45 +20,36 @@ let xSpd = 3;
 let ySpd = 3;
 
 
-let r, g, b;
-let bg_color = 220;
-
-
-var trapped = false;
+let r,g,b;
 
 
 
 function setup() {
   let cnv = createCanvas(400, 400);
   cnv.id("p5-canvas");
-  background(bg_color);
-
-  /*******
-   Connect to the WebSocket server using the io.connect() method provided by the socket.io library, 
-   and assign the resulting socket object to the socket variable.
-   ********/
+  background(220);
+  
+ /*******
+  Connect to the WebSocket server using the io.connect() method provided by the socket.io library, 
+  and assign the resulting socket object to the socket variable.
+  ********/
   socket = io.connect();
-  console.log("socket:", socket);
+  console.log("socket:",socket);
   socket.on("serverOutPos", receiveViaSocket); // set up a listener that waits the 
 
 
 }
 
 function draw() {
-  background(bg_color);
+  background(220);
   windowX = window.screenX;
   windowY = window.screenY;
   push();
   // translate(-windowX+originX, -windowY+originY-barHeight);
-  translate(-windowX, -windowY - windowBar); // align the origin
-  // translate(0, windowBar+screenBar); // offset the bars
+  translate(-windowX, -windowY-windowBar); // align the origin
+  translate(0, windowBar+screenBar); // offset the bars
 
   circle(pX, pY, 20); // relative pos
-
-  line(0, 100, 500, 100);
-  line(0, 200, 500, 200);
-  line(0, 500, 500, 500);
-  line(0, 600, 500, 600);
 
   // opposite angles
   // circle(0,0,20);
@@ -67,41 +57,27 @@ function draw() {
 
   pop();
 
-  move();
-  console.log(trapped);
-  if (mouseIsPressed == true) {
-    trapped = true;
-  }
 
-
-  if (trapped == true) {
-    console.log("trapped");
-    bounce();
-  }
-
+  // move();
+  bounce();
 
 }
 
 
-
-function move() {
-  //update pos
-  pX += xSpd;
-  pY += ySpd;
-  if (pY > screenHeight) {
-    pX = 0;
-    pY = 200;
-  }
+function move(){
+    //update pos
+    pX += xSpd;
+    pY += ySpd;
 }
 
-function bounce() {
+function bounce(){
 
-  if (pX > windowX + window.innerWidth || pX < windowX + 0) {
+  if (pX  > windowX + width || pX  < windowX + 0) {
     console.log(pX, pY);
     console.log("x bound", windowX + width);
     xSpd *= -1;
   }
-  if (pY > windowY + windowBar + window.innerHeight || pY < windowY + windowBar) {
+  if (pY > windowY + height  || pY < windowY + 0 ) {
     console.log(pX, pY);
     console.log("y bound", windowY + height);
     ySpd *= -1;
@@ -124,24 +100,43 @@ function mousePressed() {
     // g: parseFloat(g.toFixed(1)),
     // b: parseFloat(b.toFixed(1)),
   };
-
+  
   sendViaSocket(data);
-  bg_color = 0;
-  stroke(255);
-  fill(0);
+
   circle(mouseX, mouseY, 30);
 }
 
 function receiveViaSocket(data) {
   console.log("The things are printed in the browser");
   console.log(data);
-
+  
+  noStroke();
+  fill(data.r, data.g, data.b);
   circle(data.x, data.y, 15);
 }
 
 function sendViaSocket(data) {
   socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
 }
+
+// window.addEventListener("resize", resize);
+// function resize() {
+//   let p5canvas = document.getElementById("p5-canvas");
+//   console.log(p5canvas.width, p5canvas.height);
+//   element.style.width = "100px";
+//   element.style.height = "100px";
+// }
+
+
+// function windowResized() {
+      
+//       const containerWidth = document.getElementById('p5-canvas').offsetWidth;
+//       const containerHeight = document.getElementById('p5-canvas').offsetHeight;
+//       console.log("Am I here?",containerWidth,containerHeight);
+//       // resizeCanvas(containerWidth, containerHeight);
+//       // resizeCanvas(containerWidth, containerHeight);
+//       window.resizeTo(containerWidth, containerHeight);
+//     }
 
 
 
