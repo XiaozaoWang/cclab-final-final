@@ -4,7 +4,7 @@
 const express = require("express"); // require some package from the library
 const app = express(); // show a website to the clients
 
-let clients = [];
+let clients = {};
 let client_count = 0;
 
 app.use(express.static("public")); // use things inside the public folder
@@ -34,8 +34,9 @@ function newConnection(sck) {
   // sck.on()
   client_count += 1;
   sck.name = client_count;
-  sck.idCard = [sck.name, sck.id];
-  clients.push(sck.idCard);
+  clients[sck.name] = sck.id;
+  // sck.idCard = [sck.name, sck.id];
+  // clients.push(sck.idCard);
   // sck.write(`Welcome, ${sck.name}!\n`);
   console.log("clients:",clients);
 
@@ -45,9 +46,9 @@ function newConnection(sck) {
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
     console.log(data);
     console.log("from socket " + sck.name + ": " + data);
-    sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
-    console.log("broadcasted to all");
-    // io.to(clients[1]).emit(/* ... */);
+    // sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
+    // console.log("broadcasted to all");
+    sck.to(clients[3]).emit("serverOutPos", data); 
   }
 }
 
