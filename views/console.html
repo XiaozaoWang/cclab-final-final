@@ -24,17 +24,17 @@
 
   <script>
     function openNewWindow() {
-      const newWindow = window.open("new_window.html", "", "width=400,height=400");
+      const newWindow = window.open("./views/index.html", "", "width=400,height=400");
 
-      // Connect the new window to the server using socket.io
-      const socket = io();
-      socket.on("connect", function() {
-        console.log("Connected to server from new window");
-      });
-      socket.on("serverOutPos", function(data) {
-        console.log("Received data from server in new window:", data);
-      });
-      newWindow.socket = socket;
+      // // Connect the new window to the server using socket.io
+      // const socket = io();
+      // socket.on("connect", function() {
+      //   console.log("Connected to server from new window");
+      // });
+      // socket.on("serverOutPos", function(data) {
+      //   console.log("Received data from server in new window:", data);
+      // });
+      // newWindow.socket = socket;
     }
   </script>
   </body>
