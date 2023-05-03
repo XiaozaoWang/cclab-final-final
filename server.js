@@ -3,28 +3,30 @@
 // express app
 const express = require("express"); // require some package from the library
 const app = express(); // show a website to the clients
+
 let clients = [];
 let client_count = 0;
 
 app.use(express.static("public")); // use things inside the public folder
 app.get("/", function (request, response) {  // "/" is the root URL
   //req a html page
-  response.sendFile(__dirname + "/views/index.html"); // grab a special one
+  // response.sendFile(__dirname + "/views/index.html"); // grab a special one (actually starts with it)
+  response.sendFile(__dirname + "/views/console.html"); // we start with the console page
 });
 
 // HTTP Server
 const http = require("http"); 
 //const hostname = "127.0.0.1"; // localhost
 const port = 3000;
-const server = http.createServer(app);
+const server = http.createServer(app); // "server" is an HTTP server object we create here
 //server.listen(port, hostname, function() {});
 server.listen(port, function () {
   console.log("Server is running: Port: " + port);
 });
 
 // socket.io
-const socket = require("socket.io"); // library (package)
-const io = socket(server); //connect socket with server
+const socket = require("socket.io"); // load external modules or libraries 
+const io = socket(server); // create a socket.io instance called "io" and connect it with "server" (created above)
 
 io.on("connection", newConnection);
 function newConnection(sck) {
@@ -37,11 +39,7 @@ function newConnection(sck) {
   sck.write(`Welcome, ${sck.name}!\n`);
   console.log("clients:",clients);
 
-  
-  
-  
-  
-  
+
   sck.on("clientOutPos", receive); // sets up a listener for a custom event called "clientOutPos"
   function receive(data) {   // what you receive is "data"
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
