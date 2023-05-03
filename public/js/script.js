@@ -2,6 +2,8 @@
 
 // const CONNECTION_NAME = "connection_name";
 
+let thisId = prompt("ID?");
+console.log(thisId);
 let socket;
 
 let r,g,b;
@@ -31,6 +33,7 @@ function draw() {
   //circle(random(width), random(height), 30);
 
   let data = {
+    id: thisId,
     x: floor(mouseX),
     y: floor(mouseY),
     r: parseFloat(r.toFixed(1)),
@@ -55,7 +58,7 @@ function receiveViaSocket(data) {
 }
 
 function sendViaSocket(data) {
-  //socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
+  socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
 }
 
 // window.addEventListener("resize", resize);
