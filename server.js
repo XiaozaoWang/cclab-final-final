@@ -43,8 +43,9 @@ function newConnection(sck) {
   sck.on("clientOutPos", receive); // sets up a listener for a custom event called "clientOutPos"
   function receive(data) {   // what you receive is "data"
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
-    console.log(data);
+    console.log("from" + sck.id + ": " + data);
     sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
+    console.log("broadcasted to all");
   }
 }
 
