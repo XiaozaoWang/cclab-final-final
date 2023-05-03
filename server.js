@@ -48,7 +48,7 @@ function newConnection(sck) {
     console.log("from socket " + sck.name + ": " + data);
     // sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
     // console.log("broadcasted to all");
-    sck.to(clients[3]).emit("serverOutPos", data); 
+    sck.to(clients[1]).emit("serverOutPos", data); 
   }
 }
 

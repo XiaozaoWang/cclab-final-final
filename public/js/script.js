@@ -29,9 +29,7 @@ function setup() {
 
 function draw() {
   //circle(random(width), random(height), 30);
-}
 
-function mousePressed() {
   let data = {
     x: floor(mouseX),
     y: floor(mouseY),
@@ -57,7 +55,7 @@ function receiveViaSocket(data) {
 }
 
 function sendViaSocket(data) {
-  socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
+  //socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
 }
 
 // window.addEventListener("resize", resize);
