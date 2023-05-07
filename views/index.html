@@ -27,9 +27,9 @@
   <script>
     function openNewWindow() {
       const newWindow = window.open("page.html", "_blank", "width=400,height=457");
-      const newWindow2 = window.open("page.html", "_blank", "width=400,height=457");
-      newWindow.moveTo(0, 100);
-      newWindow2.moveTo(200, 200);
+      console.log(newWindow.screen.width, newWindow.screen.height);
+      newWindow.moveTo(Math.floor(Math.random() * newWindow.screen.width),
+        Math.floor(Math.random() * newWindow.screen.height));
     }
   </script>
 </body>

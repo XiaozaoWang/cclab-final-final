@@ -33,21 +33,23 @@ function newConnection(sck) {
   console.log("New Connection - ID: " + sck.id);
 
   client_count += 1;
-  sck.name = client_count;
-  clients[sck.name] = sck.id;
+  if (client_count != 1) {
+    console.log(client_count);
+    sck.broadcast.emit("newcomerAskForBall", "Please!");
+  }
+
+  // sck.name = client_count;
+  // clients[sck.name] = sck.id;
   // console.log("clients:",clients);
 
 
-  sck.on("clientOutPos", receive); // sets up a listener for a custom event called "clientOutPos"
+  sck.on("clientOutBall", receive); // sets up a listener for a custom event called "clientOutPos"
   function receive(data) {   // what you receive is "data"
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
     // console.log(data);
     // console.log("from socket " + sck.name + ": " + data);
-    console.log("receive the window pos: " + data.windowX + ", " + data.windowY);
-    console.log("receive the screen size: " + data.screenWidth + ", " + data.screenHeight);
-    sck.broadcast.emit("serverOutPos", data); // send to all except for the sender
-    // console.log("broadcasted to all");
-    // sck.to(clients[1]).emit("serverOutPos", data); 
+    sck.broadcast.emit("serverOutBall", data); // send to all except for the sender
+
   }
 }
 

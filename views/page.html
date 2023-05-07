@@ -1,26 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>p5+node+socket</title>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/css/style.css" />
+  <title>p5+node+socket</title>
 
-    <!-- libraries -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
-    
-    <script src="/js/script.js"></script>
-  </head>
-  
-  <body>
-    <div id="container-p5">
-    </div>
-  </body>
-  
+  <!-- import the webpage's stylesheet -->
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- libraries -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
+
+  <script src="/js/script.js"></script>
+  <script src="/js/particles.js"></script>
+  <script src="/js/drops.js"></script>
+  <style>
+    body {
+      overflow: hidden;
+    }
+
+    .refresh {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <button class="refresh" onclick="refresh()">refresh</button>
+  <div id="container-p5">
+  </div>
+</body>
+
 </html>

@@ -12,20 +12,47 @@ var windowX;
 var windowY;
 const screenBar = 25; // needs improvement
 const windowBar = 57; // needs improvement
-console.log("window", window.innerWidth, window.innerHeight);
+let xOff;
+let yOff;
+// console.log("window", window.innerWidth, window.innerHeight);
 
 
-let pX = 0;
-let pY = 200;
-let xSpd = 3;
-let ySpd = 3;
+// window initial settings
+let properties = ["is_bouncing_pad", "is_force", "is_black_hole"];
+let property;
+let bouncing_pads = ["left", "right", "top", "bottom"];
+let bouncing_pad;
+let forces = ["gravity", "anti_gravity", "left_push", "right_push"];
+let force;
 
 
 let r, g, b;
 let bg_color = 220;
+let c = 255;
 
 
-var trapped = false;
+let ball;
+let balls = [];
+let particles = [];
+let drops = [];
+let updrops = [];
+
+let goalX;
+let goalY;
+
+let splitit = false;
+let just_travelled = false;
+
+let beat;
+let huhu;
+let teleport;
+
+function preload() {
+  beat = loadSound("assets/beat.mp3");
+  huhu = loadSound("assets/huhu.wav");
+  teleport = loadSound("assets/teleport.wav");
+
+}
 
 
 
@@ -34,120 +61,474 @@ function setup() {
   cnv.id("p5-canvas");
   background(bg_color);
 
+
+  // window initial settings
+  property = properties[Math.floor(Math.random() * properties.length)];
+  // property = "is_gravity";
+  // property = "is_bouncing_pad";
+  if (property == "is_bouncing_pad") {
+    bouncing_pad = bouncing_pads[Math.floor(Math.random() * bouncing_pads.length)];
+  } else if (property == "is_force") {
+    force = forces[Math.floor(Math.random() * forces.length)];
+  }
+  goalX = Math.floor(Math.random() * screenWidth);
+  goalY = Math.floor(Math.random() * screenHeight);
+
+
+  // integrate window settings
+  let settings = {
+    windowX: windowX,
+    windowY: windowY,
+    property: property
+  };
+
+
+  ball = new Ball(50, 200, 0, 0, 30);
+  // balls.push(new Ball(0, 200, 1, 1, 30));
+
+
   /*******
    Connect to the WebSocket server using the io.connect() method provided by the socket.io library, 
    and assign the resulting socket object to the socket variable.
    ********/
   socket = io.connect();
   console.log("socket:", socket);
-  socket.on("serverOutPos", receiveViaSocket); // set up a listener that waits the 
-
-
+  // console.log("say sth");
+  // socket.emit("clientOutWindow", settings); // send out the window settings for once
+  socket.on("serverOutBall", receiveBallInfo); // set up a listener that waits for the event: "serverOutBall"
+  // socket.on("newcomerAskForBall", sendBallInfo); //
+  socket.on("serverOutGoal", resetGoalPos);
 }
 
 function draw() {
+  // socket.on("newcomerAskForBall", sendBallInfo);
   background(bg_color);
+  fill(c);
+
   windowX = window.screenX;
   windowY = window.screenY;
+  xOff = windowX;
+  yOff = windowY + windowBar;
+
+  drawBackground();
+
+  drawGoal(goalX, goalY);
+
   push();
-  // translate(-windowX+originX, -windowY+originY-barHeight);
   translate(-windowX, -windowY - windowBar); // align the origin
-  // translate(0, windowBar+screenBar); // offset the bars
-
-  circle(pX, pY, 20); // relative pos
-
-  line(0, 100, 500, 100);
-  line(0, 200, 500, 200);
-  line(0, 500, 500, 500);
-  line(0, 600, 500, 600);
-
-  // opposite angles
-  // circle(0,0,20);
-  // circle(width,height,20);
-
+  stroke(0);
+  circle(ball.x, ball.y, ball.dia); // relative pos
   pop();
 
-  move();
-  console.log(trapped);
-  if (mouseIsPressed == true) {
-    trapped = true;
+  ball.move();
+  // ball.split();
+  if (property == "is_bouncing_pad") {
+    ball.bounce();
+  } else if (property == "is_black_hole") {
+    ball.blackhole();
+  } else if (property == "is_force") {
+    ball.force();
   }
 
+  checkIfReached();
 
-  if (trapped == true) {
-    console.log("trapped");
-    bounce();
+}
+
+class Ball {
+  constructor(x, y, xSpd, ySpd, dia) {
+    this.ballid = balls.length + 1  //
+    this.x = x;
+    this.y = y;
+    this.xSpd = xSpd;
+    this.ySpd = ySpd;
+    this.dia = dia;
+    this.restoreXSpd = this.xSpd;
+    this.restoreYSpd = this.ySpd;
+    this.restored = true;
+    this.xAcc = 0;
+    this.yAcc = 0;
+    this.grownUp = false;
   }
 
+  move() {
+    //update pos
+    this.x += this.xSpd;
+    this.y += this.ySpd;
+    // this.xSpd += this.xAcc;
+    // this.ySpd += this.yAcc;
+    this.xSpd *= 0.99;
+    this.ySpd *= 0.99;
+    console.log("spd", this.xSpd, this.ySpd);
+    if (this.y > screenHeight - this.dia / 2) {
+      this.ySpd *= -1;
+      sendBallInfo();
+    } else if (this.y < 0 + this.dia / 2 + windowBar) {
+      this.ySpd *= -1;
+      sendBallInfo();
+    } else if (this.x > screenWidth - this.dia / 2) {
+      this.xSpd *= -1;
+      sendBallInfo();
+    } else if (this.x < 0 + this.dia / 2) {
+      this.xSpd *= -1;
+      sendBallInfo();
+    }
+  }
+
+  isInsideWindow() {
+    if (this.x < windowX + window.innerWidth + 1 && this.x > windowX + 0 - 1
+      && this.y < windowY + windowBar + window.innerHeight + 1 && this.y > windowY + windowBar - 1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bounce() {
+    fill(255, 217, 90, 50);
+    if (bouncing_pad == "bottom") {
+      push();
+      translate(-windowX, -windowY - windowBar);
+      rect(windowX, windowY + windowBar + window.innerHeight - 15, window.innerWidth, 15);
+      pop();
+      if (this.isInsideWindow() == true) {
+        if (this.y > windowY + windowBar + window.innerHeight - 15 - this.dia / 2) {
+          this.y = windowY + windowBar + window.innerHeight - 15 - this.dia / 2;
+          this.ySpd *= -1;
+          beat.play();
+          sendBallInfo();
+        }
+      }
+    } else if (bouncing_pad == "top") {
+      push();
+      translate(-windowX, -windowY - windowBar);
+      rect(windowX, windowY + windowBar, window.innerWidth, 15);
+      pop();
+      if (this.isInsideWindow() == true) {
+        if (this.y < windowY + windowBar + 15 + this.dia / 2) {
+          this.y = windowY + windowBar + 15 + this.dia / 2;
+          this.ySpd *= -1;
+          beat.play();
+          sendBallInfo();
+        }
+      }
+    } else if (bouncing_pad == "left") {
+      push();
+      translate(-windowX, -windowY - windowBar);
+      rect(windowX + window.innerWidth - 15, windowY + windowBar, 15, window.innerHeight);
+      pop();
+      if (this.isInsideWindow() == true) {
+        if (this.x > windowX + window.innerWidth - 15 - this.dia / 2) {
+          this.x = windowX + window.innerWidth - 15 - this.dia / 2;
+          this.xSpd *= -1;
+          beat.play();
+          sendBallInfo();
+        }
+      }
+    } else if (bouncing_pad == "right") {
+      push();
+      translate(-windowX, -windowY - windowBar);
+      rect(windowX, windowY + windowBar, 15, window.innerHeight);
+      pop();
+      if (this.isInsideWindow() == true) {
+        if (this.x < windowX + 0 + 15 + this.dia / 2) {
+          this.x = windowX + 0 + 15 + this.dia / 2;
+          this.xSpd *= -1;
+          beat.play();
+          sendBallInfo();
+        }
+      }
+    }
+  }
+
+  blackhole() {
+    let centerX = windowX + window.innerWidth / 2; // absolute pos
+    let centerY = windowY + windowBar + window.innerHeight / 2;
+    push();
+    translate(-windowX, -windowY - windowBar);
+    stroke(88, 0, 255);
+    angleMode(RADIANS);
+    for (let i = 0; i < 360; i += 15) {
+      let x = centerX + 30 * cos(radians(i));
+      let y = centerY + 20 * sin(radians(i));
+      let x2 = centerX + 60 * cos(radians(i));
+      let y2 = centerY + 23 * sin(radians(i));
+      let size = map(sin(frameCount / 15 + i * 3), -1, 1, 5, 10);
+      fill(0, 255, 202, 150);
+      ellipse(x, y, size, size);
+      fill(0, 255, 202, 50);
+      ellipse(x2, y2, size, size);
+    }
+    pop();
+    if (this.x < centerX + 25 && this.x > centerX - 25
+      && this.y < centerY + 15 && this.y > centerY - 15) {
+      this.xSpd *= 9 / 10;
+      this.ySpd *= 9 / 10;
+      this.dia -= 3;
+      if (this.dia < 15) {
+        this.x = random(0, screenWidth);
+        this.y = random(0, screenHeight);
+        this.xSpd = random(-2, 2);
+        this.ySpd = random(-2, 2);
+        this.storeX = this.x;
+        this.storeY = this.y;
+        this.dia = 30;
+        just_travelled = true;
+        sendBallInfo();
+        teleport.play();
+      }
+    }
+    // let frame = 0;
+    if (just_travelled == true) {
+      stroke(255);
+      fill(0, 255, 202);
+      particles.push(new Particle(this.storeX, this.storeY, random(-2, 2), random(-2, 2), 12));
+      for (let i = 0; i < particles.length; i++) {
+        let particle = particles[i];
+        particle.show();
+        particle.move();
+        particle.shrink();
+      }
+      if (particles.length > 30) {
+        particles.splice(0, 1);
+      }
+      // frame++;
+      // console.log(frame);
+      // if (frame > 1000) {
+      //   just_travelled = false;
+      // }
+    }
+  }
+
+  force() {
+    if (force == "gravity") {
+      if (this.isInsideWindow() == true) {
+        // this.dia += 0.02;
+        this.ySpd += 1.5;
+        sendBallInfo();
+        if (huhu.isPlaying() == false) {
+          huhu.loop();
+        }
+      } else {
+        huhu.pause();
+      }
+      if (frameCount % 5 == 0) {
+        drops.push(new Drop(random(windowX, windowX + window.innerWidth), windowY));
+      }
+      for (let i = 0; i < drops.length; i++) {
+        drops[i].fall();
+        drops[i].showVertical();
+      }
+      if (drops.length > 20) {
+        drops.splice(0, 1);
+      }
+    } else if (force == "anti_gravity") {
+      if (this.isInsideWindow() == true) {
+        // this.dia -= 0.02;
+        this.ySpd -= 1.5;
+        sendBallInfo();
+        if (huhu.isPlaying() == false) {
+          huhu.loop();
+        }
+      } else {
+        huhu.pause();
+      }
+      if (frameCount % 5 == 0) {
+        updrops.push(new Drop(random(windowX, windowX + window.innerWidth), windowY + windowBar + window.innerHeight));
+      }
+      for (let i = 0; i < updrops.length; i++) {
+        updrops[i].rise();
+        updrops[i].showVertical();
+      }
+      if (updrops.length > 20) {
+        updrops.splice(0, 1);
+      }
+    } else if (force == "right_push") {
+      if (this.isInsideWindow() == true) {
+        // this.dia -= 0.02;
+        this.xSpd += 1.5;
+        sendBallInfo();
+        if (huhu.isPlaying() == false) {
+          huhu.loop();
+        }
+      } else {
+        huhu.pause();
+      }
+      if (frameCount % 5 == 0) {
+        updrops.push(new Drop(windowX - 20, random(windowY + windowBar, windowY + windowBar + window.innerHeight)));
+      }
+      for (let i = 0; i < updrops.length; i++) {
+        updrops[i].rightPush();
+        updrops[i].showHorizontal();
+      }
+      if (updrops.length > 20) {
+        updrops.splice(0, 1);
+      }
+    } else if (force == "left_push") {
+      if (this.isInsideWindow() == true) {
+        // this.dia -= 0.02;
+        this.xSpd -= 1.5;
+        sendBallInfo();
+        if (huhu.isPlaying() == false) {
+          huhu.loop();
+        }
+      } else {
+        huhu.pause();
+      }
+      if (frameCount % 5 == 0) {
+        updrops.push(new Drop(windowX + window.innerWidth, random(windowY + windowBar, windowY + windowBar + window.innerHeight)));
+      }
+      for (let i = 0; i < updrops.length; i++) {
+        updrops[i].leftPush();
+        updrops[i].showHorizontal();
+      }
+      if (updrops.length > 20) {
+        updrops.splice(0, 1);
+      }
+    }
+
+  }
 
 }
 
 
 
-function move() {
-  //update pos
-  pX += xSpd;
-  pY += ySpd;
-  if (pY > screenHeight) {
-    pX = 0;
-    pY = 200;
+function refresh() {
+  if (property == "is_bouncing_pad") {
+    bouncing_pad = bouncing_pads[Math.floor(Math.random() * bouncing_pads.length)];
   }
 }
-
-function bounce() {
-
-  if (pX > windowX + window.innerWidth || pX < windowX + 0) {
-    console.log(pX, pY);
-    console.log("x bound", windowX + width);
-    xSpd *= -1;
-  }
-  if (pY > windowY + windowBar + window.innerHeight || pY < windowY + windowBar) {
-    console.log(pX, pY);
-    console.log("y bound", windowY + height);
-    ySpd *= -1;
-  }
-}
-
-
 
 
 function mousePressed() {
-  let data = {
-    // id: thisId,
-    screenWidth: screenWidth,
-    screenHeight: screenHeight,
-    windowX: windowX,
-    windowY: windowY,
-    x: floor(mouseX),
-    y: floor(mouseY)
-    // r: parseFloat(r.toFixed(1)),
-    // g: parseFloat(g.toFixed(1)),
-    // b: parseFloat(b.toFixed(1)),
-  };
 
-  sendViaSocket(data);
+
+  if (splitit == true) {
+    balls.splice(0, 1);
+    for (let i = 0; i < 5; i++) {
+      balls.push(new Ball(mouseX + xOff, mouseY + yOff, random(-2, 2), random(-2, 2), 20)); // absolute value
+    }
+    splitit = false;
+  }
   bg_color = 0;
-  stroke(255);
   fill(0);
-  circle(mouseX, mouseY, 30);
 }
 
-function receiveViaSocket(data) {
-  console.log("The things are printed in the browser");
-  console.log(data);
+function sendWindowInfo() {
 
-  circle(data.x, data.y, 15);
 }
 
-function sendViaSocket(data) {
-  socket.emit("clientOutPos", data); // CONNECTION_NAME i.e."connection_name", type of event
+function sendBallInfo() {
+  console.log("sent");
+  let data = {
+    x: ball.x,
+    y: ball.y,
+    xSpd: ball.xSpd,
+    ySpd: ball.ySpd,
+    dia: ball.dia,
+    xAcc: ball.xAcc,
+    yAcc: ball.yAcc
+  };
+  socket.emit("clientOutBall", data);
+}
+
+
+function receiveBallInfo(data) {
+  console.log("got");
+  ball.x = data.x;
+  ball.y = data.y;
+  ball.xSpd = data.xSpd;
+  ball.ySpd = data.ySpd;
+  ball.dia = data.dia;
+  ball.xAcc = data.xAcc;
+  ball.yAcc = data.yAcc;
+}
+
+
+function resetGoalPos(goalData) {
+  goalX = goalData.gX;
+  goalY = goalData.gY;
 }
 
 
 
+window.addEventListener("resize", resize);
+function resize() {
+  let p5canvas = document.getElementById("p5-canvas");
+  resizeCanvas(windowWidth, windowHeight);
+}
 
 
 
+function checkIfReached() {
+  if (ball.x > goalX - 15 && ball.x < goalX + 15
+    && ball.y > goalY - 15 && ball.y < goalY + 15) {
+    goalX = Math.floor(Math.random() * screenWidth);
+    goalY = Math.floor(Math.random() * screenHeight);
+    console.log("reached!!");
+  }
+}
+
+
+function drawGoal(x, y) {
+  console.log("goal", x, y);
+  console.log("screen", screenWidth, screenHeight);
+  push();
+  translate(-windowX, -windowY - windowBar);
+  stroke(255, 200, 0);
+  strokeWeight(2);
+  fill(255, 200, 0, 50);
+  const gX = x;
+  const gY = y;
+  const radius = 30;
+  const npoints = 5;
+  const angle = 360 / npoints;
+  const halfAngle = angle / 2;
+  beginShape();
+  for (let a = 0; a < 360; a += angle) {
+    const sx = gX + cos(a) * radius;
+    const sy = gY + sin(a) * radius;
+    vertex(sx, sy);
+    const tx = gX + cos(a + halfAngle) * radius / 2.5;
+    const ty = gY + sin(a + halfAngle) * radius / 2.5;
+    vertex(tx, ty);
+  }
+  endShape(CLOSE);
+  pop();
+
+}
+
+
+
+function drawBackground() {
+  // absolute value
+  push();
+  translate(-windowX, -windowY - windowBar);
+  bg_color = color(202, 240, 248);
+  stroke(255);
+  strokeWeight(0.5);
+  angleMode(DEGREES);
+  translate(screenWidth / 2, screenHeight / 2);
+  let distance = 5;
+
+
+  for (let i = 0; i < 150; i++) {
+
+    for (let j = 0; j < 360; j += 29.7) {
+      let r = map(i, 0, 50, 0, 202);
+      let g = map(i, 0, 50, 120, 240);
+      let b = map(i, 0, 50, 216, 248);
+      R = map(i, 60, 0, 0, 202);
+      G = map(i, 60, 0, 180, 240);
+      B = map(i, 60, 0, 216, 248);
+      rotate(j);
+      fill(r, g, b, 180);
+      stroke(R, G, B);
+      rect(0, i * 5.5, 30 + i, 30 + i);
+
+    }
+  }
+  pop();
+}
 
 
 
