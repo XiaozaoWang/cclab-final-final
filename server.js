@@ -7,6 +7,18 @@ const app = express(); // show a website to the clients
 let clients = {};
 let client_count = 0;
 
+// initialize Data
+let Data = {
+  x: 200,
+  y: 200,
+  xSpd: 0,
+  ySpd: 0,
+  dia: 40,
+  xAcc: 0,
+  yAcc: 0,
+  scale: 1
+};
+
 app.use(express.static("public"));
 app.use(express.static("views"));// use things inside the public folder
 app.get("/", function (request, response) {  // "/" is the root URL
@@ -33,14 +45,16 @@ function newConnection(sck) {
   console.log("New Connection - ID: " + sck.id);
 
   client_count += 1;
-  if (client_count != 1) {
-    console.log(client_count);
-    sck.broadcast.emit("newcomerAskForBall", "Please!");
-  }
+  // if (client_count != 1) {
+  //   console.log(client_count);
+  //   sck.broadcast.emit("newcomerAskForBall", "Please!");
+  // }
 
   // sck.name = client_count;
   // clients[sck.name] = sck.id;
   // console.log("clients:",clients);
+
+  sck.emit("serverOutBall", Data);
 
 
   sck.on("clientOutBall", receive); // sets up a listener for a custom event called "clientOutPos"
@@ -48,7 +62,8 @@ function newConnection(sck) {
     //https://socket.io/docs/v3/emit-cheatsheet/index.html
     // console.log(data);
     // console.log("from socket " + sck.name + ": " + data);
-    sck.broadcast.emit("serverOutBall", data); // send to all except for the sender
+    Data = data;
+    sck.broadcast.emit("serverOutBall", Data); // send to all except for the sender
 
   }
 }

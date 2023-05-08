@@ -71,8 +71,10 @@ function setup() {
   } else if (property == "is_force") {
     force = forces[Math.floor(Math.random() * forces.length)];
   }
-  goalX = Math.floor(Math.random() * screenWidth);
-  goalY = Math.floor(Math.random() * screenHeight);
+  // goalX = Math.floor(Math.random() * screenWidth);
+  // goalY = Math.floor(Math.random() * screenHeight);
+  goalX = 1000;
+  goalY = 200;
 
 
   // integrate window settings
@@ -83,7 +85,7 @@ function setup() {
   };
 
 
-  ball = new Ball(50, 200, 0, 0, 30);
+  ball = new Ball(200, 200, 0, 0, 40);
   // balls.push(new Ball(0, 200, 1, 1, 30));
 
 
@@ -97,7 +99,7 @@ function setup() {
   // socket.emit("clientOutWindow", settings); // send out the window settings for once
   socket.on("serverOutBall", receiveBallInfo); // set up a listener that waits for the event: "serverOutBall"
   // socket.on("newcomerAskForBall", sendBallInfo); //
-  socket.on("serverOutGoal", resetGoalPos);
+  // socket.on("serverOutGoal", resetGoalPos);
 }
 
 function draw() {
@@ -117,7 +119,8 @@ function draw() {
   push();
   translate(-windowX, -windowY - windowBar); // align the origin
   stroke(0);
-  circle(ball.x, ball.y, ball.dia); // relative pos
+  // circle(ball.x, ball.y, ball.dia); // relative pos
+  drawRocket(ball.x, ball.y);
   pop();
 
   ball.move();
@@ -147,6 +150,7 @@ class Ball {
     this.restored = true;
     this.xAcc = 0;
     this.yAcc = 0;
+    this.scale = 1;
     this.grownUp = false;
   }
 
@@ -158,7 +162,7 @@ class Ball {
     // this.ySpd += this.yAcc;
     this.xSpd *= 0.99;
     this.ySpd *= 0.99;
-    console.log("spd", this.xSpd, this.ySpd);
+    // console.log("spd", this.xSpd, this.ySpd);
     if (this.y > screenHeight - this.dia / 2) {
       this.ySpd *= -1;
       sendBallInfo();
@@ -259,19 +263,20 @@ class Ball {
       ellipse(x2, y2, size, size);
     }
     pop();
-    if (this.x < centerX + 25 && this.x > centerX - 25
-      && this.y < centerY + 15 && this.y > centerY - 15) {
-      this.xSpd *= 9 / 10;
-      this.ySpd *= 9 / 10;
-      this.dia -= 3;
-      if (this.dia < 15) {
+
+    if (this.x < centerX + 100 && this.x > centerX - 100
+      && this.y < centerY + 70 && this.y > centerY - 70) {
+      this.xSpd += (centerX - this.x) / 35;
+      this.ySpd += (centerY - this.y) / 35;
+      this.scale -= 0.02;
+      if (this.scale < 0.55) {
         this.x = random(0, screenWidth);
-        this.y = random(0, screenHeight);
-        this.xSpd = random(-2, 2);
-        this.ySpd = random(-2, 2);
+        this.y = random(windowBar + screenBar, screenHeight);
+        this.xSpd = random(-3, 3);
+        this.ySpd = random(-3, 3);
         this.storeX = this.x;
         this.storeY = this.y;
-        this.dia = 30;
+        this.scale = 1;
         just_travelled = true;
         sendBallInfo();
         teleport.play();
@@ -393,24 +398,30 @@ class Ball {
 
 
 function refresh() {
-  if (property == "is_bouncing_pad") {
-    bouncing_pad = bouncing_pads[Math.floor(Math.random() * bouncing_pads.length)];
-  }
+  // if (property == "is_bouncing_pad") {
+  //   bouncing_pad = bouncing_pads[Math.floor(Math.random() * bouncing_pads.length)];
+  // }
+  ball.x = 100;
+  ball.y = 200;
+  ball.xSpd = 0;
+  ball.ySpd = 0;
+  ball.dia = 40;
+  ball.scale = 1;
+  console.log("refreshed");
+  sendBallInfo();
 }
 
 
 function mousePressed() {
-
-
-  if (splitit == true) {
-    balls.splice(0, 1);
-    for (let i = 0; i < 5; i++) {
-      balls.push(new Ball(mouseX + xOff, mouseY + yOff, random(-2, 2), random(-2, 2), 20)); // absolute value
-    }
-    splitit = false;
-  }
-  bg_color = 0;
-  fill(0);
+  // if (splitit == true) {
+  //   balls.splice(0, 1);
+  //   for (let i = 0; i < 5; i++) {
+  //     balls.push(new Ball(mouseX + xOff, mouseY + yOff, random(-2, 2), random(-2, 2), 20)); // absolute value
+  //   }
+  //   splitit = false;
+  // }
+  // bg_color = 0;
+  // fill(0);
 }
 
 function sendWindowInfo() {
@@ -426,7 +437,8 @@ function sendBallInfo() {
     ySpd: ball.ySpd,
     dia: ball.dia,
     xAcc: ball.xAcc,
-    yAcc: ball.yAcc
+    yAcc: ball.yAcc,
+    scale: ball.scale
   };
   socket.emit("clientOutBall", data);
 }
@@ -441,6 +453,7 @@ function receiveBallInfo(data) {
   ball.dia = data.dia;
   ball.xAcc = data.xAcc;
   ball.yAcc = data.yAcc;
+  ball.scale = data.scale;
 }
 
 
@@ -462,16 +475,59 @@ function resize() {
 function checkIfReached() {
   if (ball.x > goalX - 15 && ball.x < goalX + 15
     && ball.y > goalY - 15 && ball.y < goalY + 15) {
-    goalX = Math.floor(Math.random() * screenWidth);
-    goalY = Math.floor(Math.random() * screenHeight);
+    // goalX = Math.floor(Math.random() * screenWidth);
+    // goalY = Math.floor(Math.random() * screenHeight);
     console.log("reached!!");
+    ball.xSpd = 0;
+    ball.ySpd = 0;
+
   }
 }
 
+function drawRocket(x, y) {
+  push();
+  angleMode(RADIANS);
+  stroke(0);
+  strokeWeight(2);
+  translate(x, y);
+  rotate(atan(ball.xSpd + 0.01, ball.ySpd));
+  scale(ball.scale);
+  // draw the rocket body
+  fill(255);
+  rect(-10, -10, 20, 35);
+  noStroke();
+  fill(200);
+  rect(5, -10, 5, 35);
+  stroke(0);
+  noFill();
+  rect(-10, -10, 20, 35);
+
+  // draw the rocket nose
+  fill(255, 0, 0);
+  triangle(-10, -10, 10, -10, 0, -25);
+  // draw the rocket flames
+  fill(255, 165, 0); // set fill color to orange
+  push();
+  translate(0, -1 + sin(frameCount / 30) * 5);
+  triangle(0, 20, -7, 30, 7, 30);
+  pop();
+  push();
+  translate(0, -8 + sin(0.5 + frameCount / 30) * 5);
+  triangle(-13, 15, -13, 30, -20, 30);
+  pop();
+  push();
+  translate(0, -8 + sin(0.5 + frameCount / 30) * 5);
+  triangle(13, 15, 13, 30, 20, 30);
+  pop();
+  pop();
+}
+
+
+
 
 function drawGoal(x, y) {
-  console.log("goal", x, y);
-  console.log("screen", screenWidth, screenHeight);
+  // console.log("goal", x, y);
+  // console.log("screen", screenWidth, screenHeight);
   push();
   translate(-windowX, -windowY - windowBar);
   stroke(255, 200, 0);
@@ -479,7 +535,7 @@ function drawGoal(x, y) {
   fill(255, 200, 0, 50);
   const gX = x;
   const gY = y;
-  const radius = 30;
+  const radius = 20;
   const npoints = 5;
   const angle = 360 / npoints;
   const halfAngle = angle / 2;
